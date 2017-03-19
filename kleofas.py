@@ -14,7 +14,7 @@ import logging
 import re
 
 
-logging.basicConfig(format='%(asctime)-12s %(thread)d %(name)s %(levelname)s: %(message)s',
+logging.basicConfig(format='%(asctime)-12s %(name)s %(levelname)s: %(message)s',
         level=logging.INFO)
 
 
