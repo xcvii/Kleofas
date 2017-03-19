@@ -6,7 +6,10 @@ Personal Telegram bot
 '''
 
 
-import TgBot
+from TgBot import TgBot
+from CommandManager import CommandManager, BadCommand
+from Types import Text
+
 import logging
 import re
 
@@ -15,22 +18,30 @@ logging.basicConfig(format='%(asctime)-12s %(thread)d %(name)s %(levelname)s: %(
         level=logging.INFO)
 
 
-class Kleofas(TgBot.TgBot):
+class Kleofas(TgBot):
     def __init__(self, event_loop, token, owner):
-        TgBot.TgBot.__init__(self, event_loop, token)
+        TgBot.__init__(self, event_loop, token)
         self.__owner = re.sub('^@', '', owner) if owner is not None else None
 
+        self.__command_manager = CommandManager()
+
     def handle_message(self, update_id, message):
-        TgBot.TgBot.handle_message(self, update_id, message)
+        TgBot.handle_message(self, update_id, message)
 
         chat_id = message['chat']['id']
 
         if re.match('(?:hi|hello)[!.]?', message['text'], flags=re.I):
-            self.send_message(chat_id, "Hi %s!" % message['from']['first_name'])
+            self.send(chat_id, Text("Hi %s!" % message['from']['first_name']))
 
         if self.__owner is None or message['from']['username'] == self.__owner:
-            if message['text'].lower() == 'xyzzy':
-                self.send_message(chat_id, 'Nothing happens.')
+            if re.match('/.+', message['text']):
+                try:
+                    self.send(chat_id, self.__command_manager.run(message['text']))
+                except BadCommand as b:
+                    logging.error(b.message)
+
+            elif message['text'].lower() == 'xyzzy':
+                self.send(chat_id, Text('Nothing happens.'))
 
 
 def parse_rcfile(path):

@@ -3,6 +3,9 @@ Simple asynchronous Python wrapper for the Telegram Bot REST API
 '''
 
 
+from Types import Text
+
+
 class NoResult(Exception):
     def __init__(self, message):
         self.message = message
@@ -111,9 +114,14 @@ class TgBot:
                 self.__last_update_id = update_id
 
 
-    def send_message(self, chat_id, text):
-        self.__logger.info("sending message (chat #%d): %s" % (chat_id, text))
+    def send_text(self, chat_id, text):
+        self.__logger.info("sending text (chat #%d): %s" % (chat_id, text))
         message = self.__request('sendMessage', chat_id=chat_id, text=text)
         return message
+
+
+    def send(self, chat_id, message):
+        if type(message) is Text:
+            self.send_text(chat_id, message.text)
 
 
