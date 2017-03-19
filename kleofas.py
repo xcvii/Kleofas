@@ -60,7 +60,7 @@ def main():
     import sys
     import asyncio
 
-    parser = argparse.ArgumentParser(description=__doc__, fromfile_prefix_chars='@')
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--token',  required=True, help='Telegram bot token')
     parser.add_argument('--owner', help='Only respond to this user id when specified')
     parser.add_argument('--no-owner', dest='owner', action='store_const', const=None)
