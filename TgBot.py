@@ -4,6 +4,7 @@ Simple asynchronous Python wrapper for the Telegram Bot REST API
 
 
 from Types import Text
+import functools
 
 
 class NoResult(Exception):
@@ -32,8 +33,6 @@ class TgBot:
 
 
     def __keep_polling(self, period, callback):
-        import functools
-
         def f():
             callback()
             self.__loop.call_later(
@@ -91,7 +90,7 @@ class TgBot:
         return name
 
 
-    def handle_message(self, update_id, message):
+    def handle_message(self, message):
         self.__logger.info("received message from %s (chat #%d): %s" % (
             self.__get_username(message['from']),
             message['chat']['id'],
@@ -114,7 +113,8 @@ class TgBot:
 
             if self.__last_update_id is None or self.__last_update_id < update_id:
                 if 'message' in update:
-                    self.handle_message(update_id, update['message'])
+                    self.__loop.call_soon(
+                            functools.partial(self.handle_message, update['message']))
 
                 self.__last_update_id = update_id
 

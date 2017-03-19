@@ -25,8 +25,8 @@ class Kleofas(TgBot):
 
         self.__command_manager = CommandManager()
 
-    def handle_message(self, update_id, message):
-        TgBot.handle_message(self, update_id, message)
+    def handle_message(self, message):
+        TgBot.handle_message(self, message)
 
         chat_id = message['chat']['id']
 
