@@ -58,7 +58,12 @@ class TgBot:
         full_query = "/bot%s/%s" % (self.__token, query)
 
         conn = http.client.HTTPSConnection(self.__host)
-        conn.request('GET', full_query)
+
+        try:
+            conn.request('GET', full_query)
+        except ConnectionResetError as e:
+            raise NoResult('Connection reset by peer')
+
         response = conn.getresponse()
 
         data = response.read()
