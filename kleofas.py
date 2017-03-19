@@ -16,8 +16,8 @@ logging.basicConfig(format='%(asctime)-12s %(thread)d %(name)s %(levelname)s: %(
 
 
 class Kleofas(TgBot.TgBot):
-    def __init__(self, token, owner):
-        TgBot.TgBot.__init__(self, token)
+    def __init__(self, event_loop, token, owner):
+        TgBot.TgBot.__init__(self, event_loop, token)
         self.__owner = re.sub('^@', '', owner) if owner is not None else None
 
     def handle_message(self, update_id, message):
@@ -47,6 +47,7 @@ def main():
     import os
     import os.path
     import sys
+    import asyncio
 
     parser = argparse.ArgumentParser(description=__doc__, fromfile_prefix_chars='@')
     parser.add_argument('--token',  required=True, help='Telegram bot token')
@@ -59,15 +60,18 @@ def main():
     censored_args = { k: '...' if k == 'token' else vars(args)[k] for k in vars(args) }
     logging.info("running with options: %s" % censored_args)
 
-    kleofas = Kleofas(token=args.token, owner=args.owner)
+    event_loop = asyncio.get_event_loop()
+
+    kleofas = Kleofas(event_loop=event_loop, token=args.token, owner=args.owner)
 
     try:
         kleofas.start()
+        event_loop.run_forever()
     except KeyboardInterrupt:
         pass
     finally:
-        logging.warn('Shutting down...')
-        kleofas.stop()
+        logging.warn('Stopping event loop...')
+        event_loop.stop()
 
 
 if __name__ == '__main__':

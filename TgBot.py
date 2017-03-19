@@ -3,16 +3,13 @@ Simple asynchronous Python wrapper for the Telegram Bot REST API
 '''
 
 
-import asyncio
-
-
 class NoResult(Exception):
     def __init__(self, message):
         self.message = message
 
 
 class TgBot:
-    def __init__(self, token, event_loop=asyncio.get_event_loop()):
+    def __init__(self, event_loop, token):
         import logging
 
         # config
@@ -30,11 +27,6 @@ class TgBot:
         self.__loop.call_soon(self.__get_me)
         self.__loop.call_soon(self.__init_last_update_id)
         self.__keep_polling(self.__update_poll_period, self.__get_updates)
-        self.__loop.run_forever()
-
-
-    def stop(self):
-        self.__loop.stop();
 
 
     def __keep_polling(self, period, callback):
