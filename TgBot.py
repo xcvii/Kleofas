@@ -22,8 +22,7 @@ class TgBot:
         # state
         self.__last_update_id = None
 
-
-    def start(self):
+        # start
         self.__loop.call_soon(self.__get_me)
         self.__loop.call_soon(self.__init_last_update_id)
         self.__keep_polling(self.__update_poll_period, self.__get_updates)

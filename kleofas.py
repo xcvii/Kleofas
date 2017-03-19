@@ -65,7 +65,6 @@ def main():
     kleofas = Kleofas(event_loop=event_loop, token=args.token, owner=args.owner)
 
     try:
-        kleofas.start()
         event_loop.run_forever()
     except KeyboardInterrupt:
         pass
