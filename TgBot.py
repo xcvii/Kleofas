@@ -3,8 +3,7 @@ Simple asynchronous Python wrapper for the Telegram Bot REST API
 '''
 
 
-from Types import Text
-import functools
+import asyncio
 
 
 class NoResult(Exception):
@@ -13,59 +12,53 @@ class NoResult(Exception):
 
 
 class TgBot:
-    def __init__(self, event_loop, token):
+    def __init__(self, loop, token):
+        import aiohttp
         import logging
 
         # config
         self.__logger = logging.getLogger('TgBot')
-        self.__update_poll_period = 1
-        self.__loop = event_loop
+        self.__loop = loop
         self.__token = token
         self.__host = 'api.telegram.org'
+        self.__http_session = aiohttp.ClientSession(loop=loop)
+        self.__update_poll_period = 1
 
         # state
         self.__last_update_id = None
 
-        # start
-        self.__loop.call_soon(self.__get_me)
-        self.__loop.call_soon(self.__init_last_update_id)
-        self.__keep_polling(self.__update_poll_period, self.__get_updates)
+
+    def __del__(self):
+        self.__http_session.close()
 
 
-    def __keep_polling(self, period, callback):
-        def f():
-            callback()
-            self.__loop.call_later(
-                    period,
-                    functools.partial(self.__keep_polling, period, callback))
+    @asyncio.coroutine
+    def start(self):
+        yield from self.__get_me()
+        yield from self.__init_last_update_id()
 
-        self.__loop.call_soon(f)
+        while True:
+            yield from self.__get_updates()
+            yield from asyncio.sleep(self.__update_poll_period, loop=self.__loop)
 
 
-    def __request(self, method, **params):
-        import http.client
+    @asyncio.coroutine
+    def __request(self, verb, **params):
         import json
         import urllib.parse
 
         if params:
-            query = "%s?%s" % (method, urllib.parse.urlencode(params))
+            query = "%s?%s" % (verb, urllib.parse.urlencode(params))
         else:
-            query = method
+            query = verb
 
         self.__logger.debug("running query: https://%s/bot<token>/%s" % (self.__host, query))
 
-        full_query = "/bot%s/%s" % (self.__token, query)
+        full_query = "https://%s/bot%s/%s" % (self.__host, self.__token, query)
 
-        conn = http.client.HTTPSConnection(self.__host)
+        response = yield from self.__http_session.request('GET', full_query)
 
-        try:
-            conn.request('GET', full_query)
-        except ConnectionResetError as e:
-            raise NoResult('Connection reset by peer')
-
-        response = conn.getresponse()
-
-        data = response.read()
+        data = yield from response.read()
         result_json = json.loads(data.decode('UTF-8'))
 
         try:
@@ -77,8 +70,10 @@ class TgBot:
             raise NoResult('Unkown error')
 
 
+    @asyncio.coroutine
     def __get_me(self):
-        self.__logger.debug(self.__request('getMe'))
+        result = yield from self.__request('getMe')
+        self.__logger.debug(result)
 
 
     def __get_username(self, user):
@@ -98,15 +93,20 @@ class TgBot:
             ))
 
 
+    @asyncio.coroutine
     def __init_last_update_id(self):
-        updates = self.__request('getUpdates')
+        updates = yield from self.__request('getUpdates')
         if updates:
             self.__last_update_id = updates[-1]['update_id']
             self.__logger.debug("setting last update id to %d" % self.__last_update_id)
 
 
+    @asyncio.coroutine
     def __get_updates(self):
-        updates = self.__request('getUpdates', offset=(self.__last_update_id or 0) + 1)
+        import functools
+
+        offset = (self.__last_update_id or 0) + 1
+        updates = yield from self.__request('getUpdates', offset=offset)
 
         for update in updates:
             update_id = update['update_id']
@@ -119,14 +119,19 @@ class TgBot:
                 self.__last_update_id = update_id
 
 
-    def send_text(self, chat_id, text):
-        self.__logger.info("sending text (chat #%d): %s" % (chat_id, text))
-        message = self.__request('sendMessage', chat_id=chat_id, text=text)
+    @asyncio.coroutine
+    def __send_text(self, chat_id, message):
+        self.__logger.info("sending text (chat #%d): %s" % (chat_id, message))
+        message = yield from self.__request('sendMessage', chat_id=chat_id, text=message)
         return message
 
 
     def send(self, chat_id, message):
-        if type(message) is Text:
-            self.send_text(chat_id, message.text)
+        try:
+            content_type = message.content_type()
+        except AttributeError:
+            content_type = 'text/plain'
 
+        if content_type == 'text/plain':
+            asyncio.ensure_future(self.__send_text(chat_id, message))
 

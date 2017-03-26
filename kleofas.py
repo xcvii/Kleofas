@@ -8,19 +8,18 @@ Personal Telegram bot
 
 from TgBot import TgBot
 from CommandManager import CommandManager, BadCommand
-from Types import Text
 
 import logging
 import re
 
 
-logging.basicConfig(format='%(asctime)-12s %(name)s %(levelname)s: %(message)s',
+logging.basicConfig(format='%(asctime)-12s %(levelname)-5s %(name)s: %(message)s',
         level=logging.INFO)
 
 
 class Kleofas(TgBot):
-    def __init__(self, event_loop, token, owner):
-        TgBot.__init__(self, event_loop, token)
+    def __init__(self, loop, token, owner):
+        TgBot.__init__(self, loop, token)
         self.__owner = re.sub('^@', '', owner) if owner is not None else None
 
         self.__command_manager = CommandManager()
@@ -31,7 +30,7 @@ class Kleofas(TgBot):
         chat_id = message['chat']['id']
 
         if re.match('(?:hi|hello)[!.]?', message['text'], flags=re.I):
-            self.send(chat_id, Text("Hi %s!" % message['from']['first_name']))
+            self.send(chat_id, "Hi %s!" % message['from']['first_name'])
 
         if self.__owner is None or message['from']['username'] == self.__owner:
             if re.match('/.+', message['text']):
@@ -41,7 +40,7 @@ class Kleofas(TgBot):
                     logging.error(b.message)
 
             elif message['text'].lower() == 'xyzzy':
-                self.send(chat_id, Text('Nothing happens.'))
+                self.send(chat_id, 'Nothing happens.')
 
 
 def parse_rcfile(path):
@@ -64,6 +63,7 @@ def main():
     parser.add_argument('--token',  required=True, help='Telegram bot token')
     parser.add_argument('--owner', help='Only respond to this user id when specified')
     parser.add_argument('--no-owner', dest='owner', action='store_const', const=None)
+    parser.add_argument('--command-file', help='')
 
     rc_file = os.path.expanduser(os.getenv('KLEOFASRC') or '~/.kleofasrc')
     args = parser.parse_args(parse_rcfile(rc_file) + sys.argv[1:])
@@ -71,17 +71,17 @@ def main():
     censored_args = { k: '...' if k == 'token' else vars(args)[k] for k in vars(args) }
     logging.info("running with options: %s" % censored_args)
 
-    event_loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
 
-    kleofas = Kleofas(event_loop=event_loop, token=args.token, owner=args.owner)
+    kleofas = Kleofas(loop=loop, token=args.token, owner=args.owner)
 
     try:
-        event_loop.run_forever()
+        loop.run_until_complete(kleofas.start())
     except KeyboardInterrupt:
-        pass
+        loop.stop()
     finally:
-        logging.warn('Stopping event loop...')
-        event_loop.stop()
+        logging.info('Stopping event loop...')
+        loop.close()
 
 
 if __name__ == '__main__':

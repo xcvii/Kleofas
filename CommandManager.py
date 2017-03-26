@@ -2,9 +2,6 @@
 '''
 
 
-from Types import Text
-
-
 class BadCommand(Exception):
     def __init__(self, message):
         self.message = message
@@ -13,9 +10,9 @@ class BadCommand(Exception):
 class CommandManager:
     def __init__(self):
         self.__builtins = {
-            'version': Text('Kleofas, Telegram Bot and Personal Assistant, ' +
-                            'version 20170319.0, written by Endre Tamas SAJO ' +
-                            '(endre.t.sajo@gmail.com)'),
+            'version': ('Kleofas, Personal Telegram Bot, ' +
+                        'version 20170319.0, written by Endre Tamas SAJO ' +
+                        '(endre.t.sajo@gmail.com)'),
             'help':    self.__show_help,
         }
 
@@ -23,10 +20,8 @@ class CommandManager:
 
 
     def __show_help(self):
-        text = ("Available commands: %s" %
+        return ("Available commands: %s" %
                     ', '.join(sorted(["/%s" % key for key in self.__commands])))
-
-        return Text(text)
 
 
     def run(self, command_line):
