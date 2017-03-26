@@ -133,5 +133,5 @@ class TgBot:
             content_type = 'text/plain'
 
         if content_type == 'text/plain':
-            asyncio.ensure_future(self.__send_text(chat_id, message))
+            asyncio.async(self.__send_text(chat_id, message))
 
