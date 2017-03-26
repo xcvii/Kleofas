@@ -8,7 +8,13 @@ class BadCommand(Exception):
 
 
 class CommandManager:
-    def __init__(self):
+    def __init__(self, command_file):
+        from importlib.machinery import SourceFileLoader
+        import logging
+        import re
+
+        self.__logger = logging.getLogger(__name__)
+
         self.__builtins = {
             'version': ('Kleofas, Personal Telegram Bot, ' +
                         'version 20170319.0, written by Endre Tamas SAJO ' +
@@ -17,6 +23,19 @@ class CommandManager:
         }
 
         self.__commands = self.__builtins
+
+        if command_file is not None:
+            commands = SourceFileLoader('commands', command_file).load_module()
+
+            cmd_pattern = re.compile('cmd_(\w+)')
+            for attr in dir(commands):
+                match = cmd_pattern.match(attr)
+                if match:
+                    command = match.group(1)
+                    command_fun = getattr(commands, attr)
+
+                    self.__logger.info("adding custom command '/%s'" % command)
+                    self.__commands[command] = command_fun
 
 
     def __show_help(self):

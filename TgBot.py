@@ -17,7 +17,7 @@ class TgBot:
         import logging
 
         # config
-        self.__logger = logging.getLogger('TgBot')
+        self.__logger = logging.getLogger(__name__)
         self.__loop = loop
         self.__token = token
         self.__host = 'api.telegram.org'

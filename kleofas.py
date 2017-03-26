@@ -18,11 +18,11 @@ logging.basicConfig(format='%(asctime)-12s %(levelname)-5s %(name)s: %(message)s
 
 
 class Kleofas(TgBot):
-    def __init__(self, loop, token, owner):
+    def __init__(self, loop, token, owner, command_file):
         TgBot.__init__(self, loop, token)
         self.__owner = re.sub('^@', '', owner) if owner is not None else None
 
-        self.__command_manager = CommandManager()
+        self.__command_manager = CommandManager(command_file)
 
     def handle_message(self, message):
         TgBot.handle_message(self, message)
@@ -38,9 +38,6 @@ class Kleofas(TgBot):
                     self.send(chat_id, self.__command_manager.run(message['text']))
                 except BadCommand as b:
                     logging.error(b.message)
-
-            elif message['text'].lower() == 'xyzzy':
-                self.send(chat_id, 'Nothing happens.')
 
 
 def parse_rcfile(path):
@@ -73,7 +70,8 @@ def main():
 
     loop = asyncio.get_event_loop()
 
-    kleofas = Kleofas(loop=loop, token=args.token, owner=args.owner)
+    kleofas = Kleofas(loop=loop, token=args.token, owner=args.owner,
+            command_file=args.command_file)
 
     try:
         loop.run_until_complete(kleofas.start())
