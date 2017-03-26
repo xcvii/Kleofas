@@ -17,7 +17,7 @@ class CommandManager:
 
         self.__builtins = {
             'version': ('Kleofas, Personal Telegram Bot, ' +
-                        'version 20170319.0, written by Endre Tamas SAJO ' +
+                        'version 20170326.0, written by Endre Tamas SAJO ' +
                         '(endre.t.sajo@gmail.com)'),
             'help':    self.__show_help,
         }
