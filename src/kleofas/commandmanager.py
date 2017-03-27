@@ -2,6 +2,9 @@
 '''
 
 
+from _metadata import __project__, __version__
+
+
 class BadCommand(Exception):
     def __init__(self, message):
         self.message = message
@@ -16,9 +19,7 @@ class CommandManager:
         self.__logger = logging.getLogger(__name__)
 
         self.__builtins = {
-            'version': ('Kleofas, Personal Telegram Bot, ' +
-                        'version 20170326.0, written by Endre Tamas SAJO ' +
-                        '(endre.t.sajo@gmail.com)'),
+            'version': "%s %s" % (__project__, __version__),
             'help':    self.__show_help,
         }
 

@@ -1,7 +1,8 @@
-'''
-Simple asynchronous Python wrapper for the Telegram Bot REST API
+'''Simple asynchronous Python wrapper for the Telegram Bot REST API
 '''
 
+
+from _metadata import __project__, __version__
 
 import asyncio
 
