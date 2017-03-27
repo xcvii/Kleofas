@@ -1,2 +1,2 @@
 # Kleofas
-This is Kleofas, Telegram Bot and Personal Assistant
+This is Kleofas, Personal Telegram Bot
