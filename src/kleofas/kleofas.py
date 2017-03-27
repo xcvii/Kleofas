@@ -7,6 +7,7 @@ from _metadata import __project__, __version__
 from tgbot import TgBot
 from commandmanager import CommandManager, BadCommand
 
+import functools
 import re
 
 
@@ -33,7 +34,9 @@ class Kleofas(TgBot):
         if self.__owner is None or message['from']['username'] == self.__owner:
             if re.match('/.+', message['text']):
                 try:
-                    self.send(chat_id, self.__command_manager.run(message['text']))
+                    self.send(
+                            chat_id,
+                            functools.partial(self.__command_manager.run, message['text']))
                 except BadCommand as b:
                     self.__logger.error(b.message)
 

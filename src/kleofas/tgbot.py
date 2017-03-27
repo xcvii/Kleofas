@@ -13,9 +13,10 @@ class NoResult(Exception):
 
 
 class TgBot:
-    def __init__(self, loop, token):
+    def __init__(self, loop, token, max_workers=1):
         import aiohttp
         import logging
+        import concurrent.futures
 
         # config
         self.__logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ class TgBot:
         self.__host = 'api.telegram.org'
         self.__http_session = aiohttp.ClientSession(loop=loop)
         self.__update_poll_period = 1
+        self.__executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
 
         # state
         self.__last_update_id = None
@@ -127,12 +129,25 @@ class TgBot:
         return message
 
 
-    def send(self, chat_id, message):
+    @asyncio.coroutine
+    def __send(self, chat_id, message_object):
+        if callable(message_object):
+            message = yield from self.__loop.run_in_executor(
+                    executor=self.__executor,
+                    func=message_object)
+        else:
+            message = message_object
+
         try:
             content_type = message.content_type()
         except AttributeError:
             content_type = 'text/plain'
 
         if content_type == 'text/plain':
-            asyncio.async(self.__send_text(chat_id, message))
+            yield from self.__send_text(chat_id, message)
+
+
+    def send(self, chat_id, message_object):
+        asyncio.async(self.__send(chat_id, message_object))
+
 
