@@ -19,6 +19,8 @@ class CommandManager:
         self.__logger = logging.getLogger(__name__)
 
         self.__builtins = {
+            'start':   { 'action': self.__show_help,
+                         'help': 'Same as /help' },
             'help':    { 'action': self.__show_help,
                          'help': 'Show this help' },
             'version': { 'action': "%s %s" % (__project__, __version__),
