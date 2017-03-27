@@ -132,9 +132,14 @@ class TgBot:
     @asyncio.coroutine
     def __send(self, chat_id, message_object):
         if callable(message_object):
-            message = yield from self.__loop.run_in_executor(
-                    executor=self.__executor,
-                    func=message_object)
+            try:
+                message = yield from self.__loop.run_in_executor(
+                        executor=self.__executor,
+                        func=message_object)
+            except:
+                import sys
+                self.__logger.error(str(sys.exc_info()[1]))
+                return
         else:
             message = message_object
 
