@@ -19,8 +19,10 @@ class CommandManager:
         self.__logger = logging.getLogger(__name__)
 
         self.__builtins = {
-            'version': "%s %s" % (__project__, __version__),
-            'help':    self.__show_help,
+            'help':    { 'action': self.__show_help,
+                         'help': 'Show this help' },
+            'version': { 'action': "%s %s" % (__project__, __version__),
+                         'help': 'Show version' },
         }
 
         self.__commands = self.__builtins
@@ -32,16 +34,17 @@ class CommandManager:
             for attr in dir(commands):
                 match = cmd_pattern.match(attr)
                 if match:
-                    command = match.group(1)
-                    command_fun = getattr(commands, attr)
+                    command  = match.group(1)
+                    function = getattr(commands, attr)
 
                     self.__logger.info("adding custom command '/%s'" % command)
-                    self.__commands[command] = command_fun
+                    self.__commands[command] = { 'action': function, 'help': function.__doc__ }
 
 
     def __show_help(self):
-        return ("Available commands: %s" %
-                    ', '.join(sorted(["/%s" % key for key in self.__commands])))
+        return ("Available commands:\n%s" %
+                '\n'.join(sorted(["\t/%s: %s" % (key, self.__commands[key]['help'])
+                        for key in self.__commands])))
 
 
     def run(self, command_line):
@@ -57,16 +60,16 @@ class CommandManager:
             args = tokens[1:]
 
             if command_word in self.__commands:
-                command = self.__commands[command_word]
+                action = self.__commands[command_word]['action']
 
                 try:
-                    if callable(command):
+                    if callable(action):
                         if args:
-                            return command(*args)
+                            return action(*args)
                         else:
-                            return command()
+                            return action()
                     else:
-                        return command
+                        return action
                 except Exception as e:
                     raise BadCommand(str(e))
             else:
