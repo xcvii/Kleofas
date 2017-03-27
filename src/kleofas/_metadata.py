@@ -1,4 +1,5 @@
-'''Project metadata'''
+'''Project metadata
+'''
 
 __project__ = 'kleofas'
 __version__ = '20170327.0'

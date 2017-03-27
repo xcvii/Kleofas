@@ -1,4 +1,4 @@
-'''
+'''Project entry point
 '''
 
 

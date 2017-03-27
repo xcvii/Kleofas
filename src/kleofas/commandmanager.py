@@ -1,4 +1,4 @@
-'''
+'''Parse and execute slash commands
 '''
 
 
