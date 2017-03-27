@@ -21,9 +21,7 @@ setup(
     author_email = get_attr('kleofas/_metadata.py', '__email__'),
 
     packages     = find_packages(),
-    entry_points = {
-        'console_scripts': [ 'kleofas = kleofas.__main__:main' ],
-    }
+    entry_points = { 'console_scripts': [ 'kleofas = kleofas.__main__:main' ] },
 )
 
 
