@@ -142,9 +142,7 @@ class TgBot:
                 if not typing:
                     self.__logger.warning('failed to set typing status')
 
-                message = yield from self.__loop.run_in_executor(
-                        executor=self.__executor,
-                        func=message_object)
+                message = yield from self.__loop.run_in_executor(self.__executor, message_object)
             except:
                 import sys
                 self.__logger.error(str(sys.exc_info()[1]))
