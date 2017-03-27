@@ -130,9 +130,18 @@ class TgBot:
 
 
     @asyncio.coroutine
+    def __send_typing(self, chat_id):
+        yield from self.__request('sendChatAction', chat_id=chat_id, action='typing')
+
+
+    @asyncio.coroutine
     def __send(self, chat_id, message_object):
         if callable(message_object):
             try:
+                typing = yield from self.__send_typing(chat_id)
+                if not typing:
+                    self.__logger.warning('failed to set typing status')
+
                 message = yield from self.__loop.run_in_executor(
                         executor=self.__executor,
                         func=message_object)
