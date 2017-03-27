@@ -72,8 +72,9 @@ class CommandManager:
                             return action()
                     else:
                         return action
-                except Exception as e:
-                    raise BadCommand(str(e))
+                except:
+                    import sys
+                    raise BadCommand(str(sys.exc_info()[1]))
             else:
                 raise BadCommand("Unknown command: %s" % command_word)
         else:
