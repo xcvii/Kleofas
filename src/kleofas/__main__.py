@@ -1,4 +1,4 @@
-'''Project entry point
+'''Kleofas, Personal Telegram Bot
 '''
 
 
@@ -28,12 +28,17 @@ def main():
     import os.path
     import asyncio
 
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--token',  required=True, help='Telegram bot token')
-    parser.add_argument('--owner', help='Only respond to this user id when specified')
+    parser = argparse.ArgumentParser(
+            description=__doc__,
+            epilog='$KLEOFASRC can be used to specify an rc file with a set of default arguments \
+                (default: ~/.kleofasrc)'
+    )
+
+    parser.add_argument('-t', '--token',  required=True, help='Telegram bot token')
+    parser.add_argument('-o', '--owner', help='Only respond to this user id when specified')
     parser.add_argument('--no-owner', dest='owner', action='store_const', const=None)
-    parser.add_argument('--command-file', metavar='PATH', help='Specify a python file with global \
-            cmd_* functions to be used as custom commands')
+    parser.add_argument('-c', '--command-file', metavar='PATH',
+            help='Specify a python file with global cmd_* functions to be used as custom commands')
 
     rc_file = os.path.expanduser(os.getenv('KLEOFASRC') or '~/.kleofasrc')
     args = parser.parse_args(__parse_rcfile(rc_file) + sys.argv[1:])
