@@ -14,5 +14,5 @@ def cmd_fortune():
     '''"Print a random, hopefully interesting, adage"'''
 
     import subprocess
-    return subprocess.check_output(['fortune'])
+    return subprocess.check_output(['fortune']).decode('UTF-8')
 

@@ -50,16 +50,15 @@ class TgBot:
         import json
         import urllib.parse
 
-        if params:
-            query = "%s?%s" % (verb, urllib.parse.urlencode(params))
-        else:
-            query = verb
+        self.__logger.debug("running query: %s %s" % (verb, params))
 
-        self.__logger.debug("running query: https://%s/bot<token>/%s" % (self.__host, query))
+        url = "https://%s/bot%s/%s" % (self.__host, self.__token, verb)
 
-        full_query = "https://%s/bot%s/%s" % (self.__host, self.__token, query)
-
-        response = yield from self.__http_session.request('GET', full_query)
+        try:
+            response = yield from self.__http_session.get(url, params=params)
+        except:
+            import sys
+            raise NoResult(str(sys.exc_info()[1]))
 
         data = yield from response.read()
         result_json = json.loads(data.decode('UTF-8'))
