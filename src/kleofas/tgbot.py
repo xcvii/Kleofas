@@ -61,7 +61,12 @@ class TgBot:
             raise NoResult(str(sys.exc_info()[1]))
 
         data = yield from response.read()
-        result_json = json.loads(data.decode('UTF-8'))
+
+        try:
+            result_json = json.loads(data.decode('UTF-8'))
+        except:
+            import sys
+            raise NoResult(str(sys.exc_info()[1]))
 
         try:
             if result_json['ok']:
